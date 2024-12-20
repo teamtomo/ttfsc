@@ -58,12 +58,18 @@ def calculate_noise_injected_fsc(result: TTFSCResult) -> None:
         result.fsc_values_corrected[to_correct] - result.fsc_values_masked_randomized[to_correct]
     ) / (1.0 - result.fsc_values_masked_randomized[to_correct])
 
-    result.estimated_resolution_frequency_pixel = float(
-        result.frequency_pixels[(result.fsc_values_corrected < result.fsc_threshold).nonzero()[0] - 1]
-    )
-    result.estimated_resolution_angstrom = float(
-        result.resolution_angstroms[(result.fsc_values_corrected < result.fsc_threshold).nonzero()[0] - 1]
-    )
+    # Find indices where FSC is below threshold
+    below_threshold_indices = (result.fsc_values_corrected < result.fsc_threshold).nonzero()
+
+    if len(below_threshold_indices) > 0:
+        # Use the first crossing point if it exists
+        index = below_threshold_indices[0] - 1
+        result.estimated_resolution_frequency_pixel = float(result.frequency_pixels[index])
+        result.estimated_resolution_angstrom = float(result.resolution_angstroms[index])
+    else:
+        # If no values below threshold, use the highest frequency (Nyquist)
+        result.estimated_resolution_frequency_pixel = float(result.frequency_pixels[-1])
+        result.estimated_resolution_angstrom = float(result.resolution_angstroms[-1])
     result.estimated_resolution_angstrom_corrected = result.estimated_resolution_angstrom
 
 
@@ -93,12 +99,18 @@ def calculate_masked_fsc(result: TTFSCResult) -> None:
         map2_tensor_masked = result.map2_tensor * result.mask_tensor
         result.fsc_values_masked = fsc(map1_tensor_masked, map2_tensor_masked)
 
-        result.estimated_resolution_frequency_pixel = float(
-            result.frequency_pixels[(result.fsc_values_masked < result.fsc_threshold).nonzero()[0] - 1]
-        )
-        result.estimated_resolution_angstrom = float(
-            result.resolution_angstroms[(result.fsc_values_masked < result.fsc_threshold).nonzero()[0] - 1]
-        )
+        # Find indices where FSC is below threshold
+        below_threshold_indices = (result.fsc_values_masked < result.fsc_threshold).nonzero()
+
+        if len(below_threshold_indices) > 0:
+            # Use the first crossing point if it exists
+            index = below_threshold_indices[0] - 1
+            result.estimated_resolution_frequency_pixel = float(result.frequency_pixels[index])
+            result.estimated_resolution_angstrom = float(result.resolution_angstroms[index])
+        else:
+            # If no values below threshold, use the highest frequency (Nyquist)
+            result.estimated_resolution_frequency_pixel = float(result.frequency_pixels[-1])
+            result.estimated_resolution_angstrom = float(result.resolution_angstroms[-1])
         result.estimated_resolution_angstrom_masked = result.estimated_resolution_angstrom
 
         return

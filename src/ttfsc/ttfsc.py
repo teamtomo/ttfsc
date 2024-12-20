@@ -78,8 +78,19 @@ def ttfsc(
 
     fsc_values_unmasked = fsc(map1_tensor, map2_tensor)
 
-    estimated_resolution_frequency_pixel = float(frequency_pixels[(fsc_values_unmasked < fsc_threshold).nonzero()[0] - 1])
-    estimated_resolution_angstrom = float(resolution_angstroms[(fsc_values_unmasked < fsc_threshold).nonzero()[0] - 1])
+    # Find indices where FSC is below threshold
+    below_threshold_indices = (fsc_values_unmasked < fsc_threshold).nonzero()
+
+    if len(below_threshold_indices) > 0:
+        # Use the first crossing point if it exists
+        index = below_threshold_indices[0] - 1
+        estimated_resolution_frequency_pixel = float(frequency_pixels[index])
+        estimated_resolution_angstrom = float(resolution_angstroms[index])
+    else:
+        # If no values below threshold, use the highest frequency (Nyquist)
+        estimated_resolution_frequency_pixel = float(frequency_pixels[-1])
+        estimated_resolution_angstrom = float(resolution_angstroms[-1])
+
     result = TTFSCResult(
         map1=map1,
         map1_tensor=map1_tensor,
