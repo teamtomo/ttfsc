@@ -25,6 +25,7 @@ def ttfsc(
     pixel_spacing_angstroms: Optional[float] = None,
     fsc_threshold: float = 0.143,
     mask: Masking = Masking.none,
+    mask_filename: Optional[Path] = None,
     mask_radius_angstroms: float = 100.0,
     mask_soft_edge_width_pixels: int = 10,
     correct_for_masking: bool = True,
@@ -40,6 +41,7 @@ def ttfsc(
         pixel_spacing_angstroms (Optional[float]): Pixel spacing in Å/px. If not provided, it will be taken from the header.
         fsc_threshold (float): FSC threshold value. Default is 0.143.
         mask (Masking): Masking option to use. Default is Masking.none.
+        mask_filename (Optional[Path]): Path to the mask file. Default is None.
         mask_radius_angstroms (float): Radius of the mask in Å. Default is 100.0.
         mask_soft_edge_width_pixels (int): Width of the soft edge of the mask in pixels. Default is 10.
         correct_for_masking (bool): Whether to correct for masking effects. Default is True.
@@ -59,6 +61,7 @@ def ttfsc(
             pixel_spacing_angstroms=1.0,
             fsc_threshold=0.143,
             mask=Masking.soft,
+            mask_filename=Path("mask.mrc"),
             mask_radius_angstroms=150.0,
             mask_soft_edge_width_pixels=5,
             correct_for_masking=True,
@@ -110,6 +113,7 @@ def ttfsc(
         from ._masking import calculate_masked_fsc
 
         result.mask = mask
+        result.mask_filename = mask_filename
         result.mask_radius_angstroms = mask_radius_angstroms
         result.mask_soft_edge_width_pixels = mask_soft_edge_width_pixels
         calculate_masked_fsc(result)
